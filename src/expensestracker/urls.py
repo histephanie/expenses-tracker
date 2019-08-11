@@ -18,6 +18,7 @@ from django.urls import path, include
 from django.conf.urls import url
 from pages.views import signup_view, home_view
 from expenses.views import expense_list_view
+import django.contrib.auth.urls
 
 urlpatterns = [
     path('', home_view, name='home'),
