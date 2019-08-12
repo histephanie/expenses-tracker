@@ -6,7 +6,7 @@ class ExpenseCategory(models.Model):
     name = models.CharField(max_length=120)
 
     def __str__(self):
-        return 'Category: ' + self.name
+        return self.name
 
 class Expense(models.Model):
     store    = models.CharField(max_length=120)
@@ -16,4 +16,4 @@ class Expense(models.Model):
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return 'Expense: ' + self.store
+        return self.store

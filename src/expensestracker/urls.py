@@ -26,6 +26,5 @@ urlpatterns = [
     url(r'^signup/$', signup_view, name='signup'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('expenses', expense_list_view, name='expenses'),
-
-
+    path('expenses/<slug:month>', expense_list_view, name='expenses'),
 ]
