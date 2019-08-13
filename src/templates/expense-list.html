@@ -16,12 +16,12 @@
           <h1 class="h2">Dashboard</h1>
           <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group mr-2">
-              <a href="/expenses/{{ last_month }}" class="btn btn-sm btn-outline-secondary">&lt;</a>
+              <a href="/expenses/{{ prev_month }}" class="btn btn-sm btn-outline-secondary">&lt;</a>
               <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
                   <span data-feather="calendar"></span>
                   {{ current_month_text }}
                 </button>
-              <a href="#" class="btn btn-sm btn-outline-secondary">&gt;</a>
+              <a href="/expenses/{{ next_month }}" class="btn btn-sm btn-outline-secondary">&gt;</a>
             </div>
 
           </div>

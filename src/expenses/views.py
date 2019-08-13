@@ -12,21 +12,27 @@ def expense_list_view(request, month=None):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    current_date = datetime.now()
-    year = datetime.now().strftime('%Y')
-    month = datetime.now().strftime('%m')
-    month_text = datetime.now().strftime('%B')
-    current_month_slug = datetime.now().strftime('%b-%Y')
+    # by default, look at the current month
+    selected_timeframe = datetime.now()
 
+    # if a specific timeframe was requested, set our timeframe to that
     if month is not None:
-        # Get the month/year from the slug
-        current_date = # parse the slug
+        # get the month/year from the slug
+        selected_timeframe = datetime.strptime(month, "%Y-%m").date()
 
-    today = current_date.today()
-    first = today.replace(day=1)
-    last_month = (first - timedelta(days=1)).strftime('%b-%Y')
+    month_text = selected_timeframe.strftime('%B')
+    current_month_slug = selected_timeframe.strftime('%Y-%m')
+    # take selected date and replace it with the first day of that month
+    # eg. Aug 13th, 2019 becomes Aug 1st, 2019
+    first = selected_timeframe.replace(day=1)
+    # take the first day of the month and subtract one more day
+    # taking you back to the previous month
+    prev_month = (first - timedelta(days=1)).strftime('%Y-%m')
+    last = selected_timeframe.replace(day=28)
+    next_month = (last + timedelta(days=4)).strftime('%Y-%m')
 
-
+    year = selected_timeframe.strftime('%Y')
+    month = selected_timeframe.strftime('%m')
     expenses = Expense.objects.filter(user=request.user, date__year=year, date__month=month)
 
     # get all categories from the database
@@ -46,6 +52,7 @@ def expense_list_view(request, month=None):
         'categories': categories,
         'current_month_text': month_text,
         'current_month_slug': current_month_slug,
-        'last_month': last_month,
+        'prev_month': prev_month,
+        'next_month': next_month,
     }
     return render(request, "expense-list.html", context)
