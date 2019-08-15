@@ -21,12 +21,11 @@
                   <span data-feather="calendar"></span>
                   {{ current_month_text }}
                 </button>
+
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Separated link</a>
+                    {% for month in nav_months %}
+                    <a class="dropdown-item" href="#">{{ month|date:"F" }}</a>
+                    {% endfor %}
                   </div>
               <a href="/expenses/{{ next_month }}" class="btn btn-sm btn-outline-secondary">&gt;</a>
             </div>

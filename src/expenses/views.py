@@ -51,13 +51,13 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     nav_months.reverse()
 
     ref_month = selected_timeframe
-
     for i in range(4):
         #goes back to the first day of the ref month
         last = ref_month.replace(day=28)
         # goes back one more day to get to the privious month
         ref_month = last + timedelta(days=4)
         # appends the ref month to end up with a list of 4 months from the selected time frame
+        # when the ref month is the bigger than the current month, dont append
         nav_months.append(ref_month)
 
     print(nav_months)
@@ -80,5 +80,6 @@ def expense_list_view(request, selected_year=None, selected_month=None):
         'current_month_slug': current_month_slug,
         'prev_month': prev_month,
         'next_month': next_month,
+        'nav_months': nav_months,
     }
     return render(request, "expense-list.html", context)
