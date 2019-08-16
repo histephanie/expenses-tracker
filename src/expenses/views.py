@@ -15,7 +15,7 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     # if a specific timeframe was requested, set our timeframe to that
     if selected_year is not None and selected_month is not None:
         # get the month/year from the slug
-        selected_timeframe = datetime.strptime(f"{selected_year}-{selected_month}", "%Y-%m").date()
+        selected_timeframe = datetime.strptime(f"{selected_year}-{selected_month}", "%Y-%m")
 
     month_text = selected_timeframe.strftime('%B')
     current_month_slug = selected_timeframe.strftime('%Y-%m')
@@ -42,23 +42,29 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     #everytime you select a month, it becomes the reference month
     ref_month = selected_timeframe
     for i in range(4):
-        #goes back to the first day of the ref month
+        # go back to the first day of the ref month
         first = ref_month.replace(day=1)
-        # goes back one more day to get to the privious month
+        # go back one more day to get to the privious month
         ref_month = first - timedelta(days=1)
-        # appends the ref month to end up with a list of 4 months from the selected time frame
+        # append the ref month to end up with a list of 4 months from the selected time frame
         nav_months.append(ref_month)
     nav_months.reverse()
 
+    present_month = datetime.now()
     ref_month = selected_timeframe
     for i in range(4):
-        #goes back to the first day of the ref month
+        # go back to the first day of the ref month
         last = ref_month.replace(day=28)
-        # goes back one more day to get to the privious month
+        # go back one more day to get to the privious month
         ref_month = last + timedelta(days=4)
-        # appends the ref month to end up with a list of 4 months from the selected time frame
-        # when the ref month is the bigger than the current month, dont append
+
+        # if ref month is later than our present month, stop adding
+        if ref_month > present_month:
+            break
+
+        # append the ref month to the list of navigation months
         nav_months.append(ref_month)
+
 
     print(nav_months)
 
@@ -81,5 +87,6 @@ def expense_list_view(request, selected_year=None, selected_month=None):
         'prev_month': prev_month,
         'next_month': next_month,
         'nav_months': nav_months,
+        'selected_timeframe': selected_timeframe,
     }
     return render(request, "expense-list.html", context)

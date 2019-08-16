@@ -19,12 +19,12 @@
               <a href="/expenses/{{ prev_month }}" class="btn btn-sm btn-outline-secondary">&lt;</a>
               <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <span data-feather="calendar"></span>
-                  {{ current_month_text }}
+                  {{ selected_timeframe|date:"F Y" }}
                 </button>
 
                 <div class="dropdown-menu dropdown-menu-right">
                     {% for month in nav_months %}
-                    <a class="dropdown-item" href="#">{{ month|date:"F" }}</a>
+                    <a class="dropdown-item" href="/expenses/{{ month|date:'Y-m' }}">{{ month|date:"F Y" }}</a>
                     {% endfor %}
                   </div>
               <a href="/expenses/{{ next_month }}" class="btn btn-sm btn-outline-secondary">&gt;</a>
