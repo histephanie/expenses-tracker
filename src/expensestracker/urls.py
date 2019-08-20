@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 from pages.views import signup_view, home_view
-from expenses.views import expense_list_view
+from expenses.views import expense_list_view, receive_email
 import django.contrib.auth.urls
 
 urlpatterns = [
@@ -27,4 +27,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('expenses', expense_list_view, name='expenses'),
     path('expenses/<int:selected_year>-<int:selected_month>', expense_list_view, name='expenses'),
+    path('api/receive-email', receive_email, name='email'),
 ]

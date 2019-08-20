@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import Expense, ExpenseCategory
 from datetime import datetime, date, timedelta
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # This view shows a list of all expenses made by the user in the current month
 # unless a specific month was requested
@@ -80,6 +82,7 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     # at key of the current expense's category, add itself to the expenses key
     for expense in expenses:
         categories[expense.category]['expenses'].append(expense)
+
     context = {
         'categories': categories,
         'current_month_text': month_text,
@@ -90,3 +93,26 @@ def expense_list_view(request, selected_year=None, selected_month=None):
         'selected_timeframe': selected_timeframe,
     }
     return render(request, "expense-list.html", context)
+
+# receives emails sent to mailgun
+# the @csrf_exempt decorator disables csrf protection for this view
+@csrf_exempt
+def receive_email(request):
+    if request.method == 'POST':
+        sender    = request.POST.get('sender')
+        recipient = request.POST.get('recipient')
+        subject   = request.POST.get('subject', '')
+        print('START',sender, recipient, subject, 'END')
+        body_html = request.POST.get('body-html', '')
+        body_without_quotes = request.POST.get('stripped-text', '')
+        print('START',body_html, 'FUCK',body_without_quotes, 'END')
+         # note: other MIME headers are also posted here...
+
+         # attachments:
+        for key in request.FILES:
+            file = request.FILES[key]
+             # do something with the file
+
+     # Returned text is ignored but HTTP status code matters:
+     # Mailgun wants to see 2xx, otherwise it will make another attempt in 5 minutes
+    return HttpResponse('OK')
