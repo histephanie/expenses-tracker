@@ -102,17 +102,20 @@ def receive_email(request):
         sender    = request.POST.get('sender')
         recipient = request.POST.get('recipient')
         subject   = request.POST.get('subject', '')
-        print('START',sender, recipient, subject, 'END')
         body_html = request.POST.get('body-html', '')
         body_without_quotes = request.POST.get('stripped-text', '')
-        print('START',body_html, 'FUCK',body_without_quotes, 'END')
-         # note: other MIME headers are also posted here...
 
-         # attachments:
+        #### SAVE body_html to a file
+        with open("email.html", "w") as text_file:
+            text_file.write(body_html)
+
+        # note: other MIME headers are also posted here...
+
+        # attachments:
         for key in request.FILES:
             file = request.FILES[key]
-             # do something with the file
+            # do something with the file
 
-     # Returned text is ignored but HTTP status code matters:
-     # Mailgun wants to see 2xx, otherwise it will make another attempt in 5 minutes
+    # Returned text is ignored but HTTP status code matters:
+    # Mailgun wants to see 2xx, otherwise it will make another attempt in 5 minutes
     return HttpResponse('OK')
