@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
-from pages.views import signup_view, home_view
+from pages.views import signup_view, home_view, test_parse_email
 from expenses.views import expense_list_view, receive_email
 import django.contrib.auth.urls
 
@@ -28,4 +28,5 @@ urlpatterns = [
     path('expenses', expense_list_view, name='expenses'),
     path('expenses/<int:selected_year>-<int:selected_month>', expense_list_view, name='expenses'),
     path('api/receive-email', receive_email, name='email'),
+    path('api/test-parse-email', test_parse_email, name='test-parse-email'),
 ]
