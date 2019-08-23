@@ -42,11 +42,15 @@ def test_parse_email(*args, **kwargs):
         date = tds[0].text
         try:
             date = datetime.strptime(date, "%d.%m.%Y")
+            date = date.strftime("%d.%m.%Y")
         except ValueError:
             continue
 
         store = tds[1].text
+        store = store.replace('Продажба', '\n')
+        store = store.strip()
         amount = tds[3].text
+        amount = amount.strip()
 
         expense = {"date":date, "store":store, "amount":amount}
         expenses.append(expense)
