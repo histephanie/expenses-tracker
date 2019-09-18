@@ -72,9 +72,12 @@ def expense_list_view(request, selected_year=None, selected_month=None):
 
     # get all categories from the database
     cats = ExpenseCategory.objects.all()
-    # make an empty dict and at index category wich is an id from the database,
-    # assing the value of a dict containing category name and an empty list for expenses
-    categories = {}
+    # make a dict that by default has a None category for uncategorized expenses and
+    # at index category which is an id from the database,
+    # assign the value of a dict containing category name and an empty list for expenses
+    categories = {
+        None: {'name': 'uncategorized', 'expenses': []}
+    }
     for category in cats:
         categories[category] = {'name': category.name, 'expenses': []}
 

@@ -5,7 +5,7 @@ from .forms import SignUpForm
 from bs4 import BeautifulSoup
 from django.http import HttpResponse
 from datetime import datetime
-
+from expenses.models import Expense, User
 
 # Create your views here.
 
@@ -15,12 +15,24 @@ def home_view(request, *args, **kwargs):
 def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
+
+        # can_reg = True
+        email = form.data.get('email')
+        if User.objects.filter(email=email).count() > 0:
+            form.add_error("email", "Email address must be unique")
+
+
+        # FIND IF A USER WITH `email` EXISTS
+        # IF IT DOES, dont proceed with reg
+        # if email exists in db:
+        #     can_reg = false
+        if form.is_valid(): # and can_reg:
+            form.save() # saves the user to db
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
+
             return redirect('expenses')
     else:
         form = SignUpForm()
@@ -28,6 +40,7 @@ def signup_view(request):
 
 def test_parse_email(*args, **kwargs):
 
+    sender = "stephanie.bogantes@gmail.com"
     mytxt = 'email.html'
     soup = BeautifulSoup(open(mytxt), 'html.parser')
     expenses = []
@@ -58,9 +71,17 @@ def test_parse_email(*args, **kwargs):
         amount = amount.replace(',', '.')
         amount = float(amount)
 
+        sender_user = User.objects.get(email=sender)
+        print(type(sender_user)) # THIS MUST BE: User
+
+        expense = Expense(store=store, date=date, amount=amount, user=sender_user)
+        expense.save()
 
         expense = {"date":date, "store":store, "amount":amount}
         expenses.append(expense)
     print(expenses)
 
     return HttpResponse("hello")
+
+    #check the email address sent by mailgun and assign the
+    #expenses to the user with the same email address
