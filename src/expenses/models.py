@@ -17,3 +17,8 @@ class Expense(models.Model):
 
     def __str__(self):
         return self.store
+
+class StoreCategoryLink(models.Model):
+    store_name = models.CharField(max_length=120)
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

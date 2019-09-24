@@ -16,8 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
-from pages.views import signup_view, home_view, test_parse_email
-from expenses.views import expense_list_view, receive_email
+from pages.views import signup_view, home_view
+from expenses.views import expense_list_view, receive_email, test_parse_email
 import django.contrib.auth.urls
 
 urlpatterns = [

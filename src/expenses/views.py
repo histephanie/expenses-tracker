@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import Expense, ExpenseCategory
 from datetime import datetime, date, timedelta
+from bs4 import BeautifulSoup
 from django.http import HttpResponse
+from datetime import datetime
+from expenses.models import Expense, User, StoreCategoryLink
 from django.views.decorators.csrf import csrf_exempt
 
 # This view shows a list of all expenses made by the user in the current month
@@ -97,27 +100,75 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     }
     return render(request, "expense-list.html", context)
 
+# takes an html string as an input, and returns a list of Expense model objects
+def extract_expenses(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    expenses = []
+    trs = soup.findAll('tr')
+    for tr in trs:
+        tds = tr.findAll('td')
+        # ignores trs that dont contain tds
+        # such as the table header
+        if len(tds) < 4:
+            continue
+
+        expense_date = tds[0].text
+        try:
+            expense_date = datetime.strptime(expense_date, "%d.%m.%Y")
+        except ValueError:
+            continue
+
+        store = tds[1].text
+        store = store.replace('Продажба', '')
+        #remove spaces around string (leading and trailing whitespace char)
+        store = store.strip()
+        #replace the unicode non-breaking space with a regular space
+        store = store.replace(u'\xa0', " ")
+
+        amount = tds[3].text
+        amount = amount.strip()
+        amount = amount.replace('.', '')
+        amount = amount.replace(',', '.')
+        amount = float(amount)
+
+        expense = Expense(store=store, date=expense_date, amount=amount, user=None)
+        expenses.append(expense)
+
+    return expenses
+
+def test_parse_email(*args, **kwargs):
+    html = ""
+    with open('email.html', 'r') as file:
+        html = file.read()
+
+    expenses = extract_expenses(html)
+
+    return HttpResponse(expenses)
+
 # receives emails sent to mailgun
 # the @csrf_exempt decorator disables csrf protection for this view
 @csrf_exempt
 def receive_email(request):
     if request.method == 'POST':
         sender    = request.POST.get('sender')
-        recipient = request.POST.get('recipient')
-        subject   = request.POST.get('subject', '')
         body_html = request.POST.get('body-html', '')
-        body_without_quotes = request.POST.get('stripped-text', '')
+        print("THIS HAPPENED!!!!!!")
 
-        #### SAVE body_html to a file
-        with open("email.html", "w") as text_file:
-            text_file.write(body_html)
+        # Check if the sender user exists in our system
+        try:
+            user = User.objects.get(email=sender)
+        except:
+            # we still return ok to mailgun to avoid them resending us the email
+            print("user not found")
+            return HttpResponse('OK')
 
-        # note: other MIME headers are also posted here...
+        # Extract all the expenses from the email
+        expenses = extract_expenses(body_html)
 
-        # attachments:
-        for key in request.FILES:
-            file = request.FILES[key]
-            # do something with the file
+        # Assign the correct user to each expense
+        for expense in expenses:
+            expense.user = user
+            expense.save()
 
     # Returned text is ignored but HTTP status code matters:
     # Mailgun wants to see 2xx, otherwise it will make another attempt in 5 minutes
