@@ -17,15 +17,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 from pages.views import signup_view, home_view
-from expenses.views import expense_list_view, receive_email, test_parse_email
+from expenses.views import expense_list_view, receive_email, test_parse_email, categorize_expense
 import django.contrib.auth.urls
 
 urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
-    url(r'^signup/$', signup_view, name='signup'),
+    path('signup', signup_view, name='signup'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('expenses', expense_list_view, name='expenses'),
+    path('categorize-expense', categorize_expense, name='categorize-expense'),
     path('expenses/<int:selected_year>-<int:selected_month>', expense_list_view, name='expenses'),
     path('api/receive-email', receive_email, name='email'),
     path('api/test-parse-email', test_parse_email, name='test-parse-email'),

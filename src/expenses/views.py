@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from .models import Expense, ExpenseCategory
 from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
-from expenses.models import Expense, User, StoreCategoryLink
+from expenses.models import Expense, User
 from django.views.decorators.csrf import csrf_exempt
 
 # This view shows a list of all expenses made by the user in the current month
@@ -79,10 +79,10 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     # at index category which is an id from the database,
     # assign the value of a dict containing category name and an empty list for expenses
     categories = {
-        None: {'name': 'uncategorized', 'expenses': []}
+        None: {'name': 'uncategorized', 'expenses': [], 'id': None}
     }
     for category in cats:
-        categories[category] = {'name': category.name, 'expenses': []}
+        categories[category] = {'name': category.name, 'expenses': [], 'id': category.pk }
 
     # for each expense, find it's category, and in the categories dictionary
     # at key of the current expense's category, add itself to the expenses key
@@ -132,11 +132,12 @@ def extract_expenses(html):
         amount = float(amount)
 
         expense = Expense(store=store, date=expense_date, amount=amount, user=None)
+
         expenses.append(expense)
 
     return expenses
 
-def test_parse_email(*args, **kwargs):
+def test_parse_email(request):
     html = ""
     with open('email.html', 'r') as file:
         html = file.read()
@@ -173,3 +174,21 @@ def receive_email(request):
     # Returned text is ignored but HTTP status code matters:
     # Mailgun wants to see 2xx, otherwise it will make another attempt in 5 minutes
     return HttpResponse('OK')
+
+def categorize_expense(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        #get id from the category selected from the dropdown menu
+        category_id = request.POST.get("category_id")
+        store = request.POST.get("store_name")
+        next_url = request.POST.get('next_url', '/expenses')
+
+        # find category in database
+        category = ExpenseCategory.objects.get(pk=category_id)
+
+        # get all expenses with the same name and belonging to the same user
+        expenses = Expense.objects.filter(user=request.user, store=store)
+        for expense in expenses:
+            # then assing the same category to them
+            expense.category = category
+            expense.save()
+        return HttpResponseRedirect(next_url)
