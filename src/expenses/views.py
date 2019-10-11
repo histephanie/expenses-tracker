@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from .models import Expense, ExpenseCategory
 from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllowed
 from datetime import datetime
-from expenses.models import Expense, User
+from expenses.models import Expense, User, StoreCategoryLink
 from django.views.decorators.csrf import csrf_exempt
 
 # This view shows a list of all expenses made by the user in the current month
@@ -142,8 +142,28 @@ def test_parse_email(request):
     with open('email.html', 'r') as file:
         html = file.read()
 
-    expenses = extract_expenses(html)
+    sender = "stephanie.bogantes@gmail.com"
+    # Check if the sender user exists in our system
+    try:
+        user = User.objects.get(email=sender)
+    except:
+        # we still return ok to mailgun to avoid them resending us the email
+        print("user not found")
+        return HttpResponse('OK')
 
+    # get unique store names and their category
+    links = StoreCategoryLink.objects.filter(user=user)
+    #make  a dic that contains store as key and category as value
+    link_dic = {}
+
+    for link in links:
+        link_dic[link.store] = link.category
+
+    expenses = extract_expenses(html)
+    for expense in expenses:
+        if expense.store in link_dic.keys():
+            expense.category = link_dic[expense.store]
+    print(expenses)
     return HttpResponse(expenses)
 
 # receives emails sent to mailgun
@@ -176,19 +196,36 @@ def receive_email(request):
     return HttpResponse('OK')
 
 def categorize_expense(request):
-    if request.method == 'POST' and request.user.is_authenticated:
-        #get id from the category selected from the dropdown menu
-        category_id = request.POST.get("category_id")
-        store = request.POST.get("store_name")
-        next_url = request.POST.get('next_url', '/expenses')
+    # handle errors early, return method not allowed if it's not a POST
+    # request or the user is not authenticated. This helps keep the code
+    # indented nicely
+    if request.method != 'POST' or not request.user.is_authenticated:
+        return HttpResponseNotAllowed(['POST'])
 
-        # find category in database
-        category = ExpenseCategory.objects.get(pk=category_id)
+    #get id from the category selected from the dropdown menu
+    category_id = request.POST.get("category_id")
+    store = request.POST.get("store_name")
+    next_url = request.POST.get('next_url', '/expenses')
 
-        # get all expenses with the same name and belonging to the same user
-        expenses = Expense.objects.filter(user=request.user, store=store)
-        for expense in expenses:
-            # then assing the same category to them
-            expense.category = category
-            expense.save()
-        return HttpResponseRedirect(next_url)
+    # find category in database
+    category = ExpenseCategory.objects.get(pk=category_id)
+
+    # get all expenses with the same name and belonging to the same user
+    expenses = Expense.objects.filter(user=request.user, store=store)
+    for expense in expenses:
+        # then assing the same category to them
+        expense.category = category
+        expense.save()
+
+    # find if a store cat link exists for this user and store...
+    links = StoreCategoryLink.objects.filter(user=request.user, store=store)
+    # ...if it does update cat and save
+    if len(links) > 0:
+        links[0].category = category
+        links[0].save()
+    # if it doesnt creat and new one and save
+    else:
+        link = StoreCategoryLink(user=request.user, store=store, category=category)
+        link.save()
+
+    return HttpResponseRedirect(next_url)
