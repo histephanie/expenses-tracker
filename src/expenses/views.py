@@ -151,18 +151,8 @@ def test_parse_email(request):
         print("user not found")
         return HttpResponse('OK')
 
-    # get unique store names and their category
-    links = StoreCategoryLink.objects.filter(user=user)
-    #make  a dic that contains store as key and category as value
-    link_dic = {}
-
-    for link in links:
-        link_dic[link.store] = link.category
-
     expenses = extract_expenses(html)
-    for expense in expenses:
-        if expense.store in link_dic.keys():
-            expense.category = link_dic[expense.store]
+    expenses = auto_categorize_expenses(user, expenses)
     print(expenses)
     return HttpResponse(expenses)
 
@@ -185,6 +175,8 @@ def receive_email(request):
 
         # Extract all the expenses from the email
         expenses = extract_expenses(body_html)
+
+        expenses = auto_categorize_expenses(user, expenses)
 
         # Assign the correct user to each expense
         for expense in expenses:
@@ -229,3 +221,17 @@ def categorize_expense(request):
         link.save()
 
     return HttpResponseRedirect(next_url)
+
+def auto_categorize_expenses(user, expenses):
+    links = StoreCategoryLink.objects.filter(user=user)
+    #make  a dic that contains store as key and category as value
+    link_dic = {}
+
+    for link in links:
+        link_dic[link.store] = link.category
+
+    for expense in expenses:
+        if expense.store in link_dic.keys():
+            expense.category = link_dic[expense.store]
+
+    return expenses
