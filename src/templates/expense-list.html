@@ -33,7 +33,13 @@
           </div>
         </div>
 
-        <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+        <script>
+            categories = {{ js_categories|safe }}
+            spent = {{ js_total_spent|safe }}
+          </script>
+        <div id="chart">
+
+        </div>
 
         {% for k, category in categories.items %}
         <h2>{{ category.name }}</h2> <!-- .name comes from our categories dictionary from views.py -->
@@ -77,5 +83,11 @@
       </main>
     </div>
   </div>
+
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="{% static 'js/expense-list.js' %}"></script>
 
 {% endblock %}

@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllow
 from datetime import datetime
 from expenses.models import Expense, User, StoreCategoryLink
 from django.views.decorators.csrf import csrf_exempt
+import json
 
 # This view shows a list of all expenses made by the user in the current month
 # unless a specific month was requested
@@ -70,24 +71,30 @@ def expense_list_view(request, selected_year=None, selected_month=None):
         # append the ref month to the list of navigation months
         nav_months.append(ref_month)
 
-
-    print(nav_months)
-
     # get all categories from the database
     cats = ExpenseCategory.objects.all()
     # make a dict that by default has a None category for uncategorized expenses and
     # at index category which is an id from the database,
     # assign the value of a dict containing category name and an empty list for expenses
     categories = {
-        None: {'name': 'uncategorized', 'expenses': [], 'id': None}
+        None: {'name': 'uncategorized', 'expenses': [], 'id': None, 'total_spent': 0}
     }
+
     for category in cats:
-        categories[category] = {'name': category.name, 'expenses': [], 'id': category.pk }
+        categories[category] = {'name': category.name, 'expenses': [], 'id': category.pk, 'total_spent': 0}
 
     # for each expense, find it's category, and in the categories dictionary
     # at key of the current expense's category, add itself to the expenses key
     for expense in expenses:
         categories[expense.category]['expenses'].append(expense)
+        categories[expense.category]['total_spent'] += expense.amount
+
+    js_categories = []
+    js_total_spent = []
+
+    for a, b in categories.items():
+        js_categories.append(b['name'])
+        js_total_spent.append(float(b['total_spent']))
 
     context = {
         'categories': categories,
@@ -97,6 +104,8 @@ def expense_list_view(request, selected_year=None, selected_month=None):
         'next_month': next_month,
         'nav_months': nav_months,
         'selected_timeframe': selected_timeframe,
+        'js_categories': json.dumps(js_categories),
+        'js_total_spent': json.dumps(js_total_spent)
     }
     return render(request, "expense-list.html", context)
 
