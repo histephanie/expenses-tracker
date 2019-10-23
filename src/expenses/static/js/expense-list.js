@@ -1,10 +1,34 @@
 var options = {
     chart: {
-        width: 480,
-        type: 'pie',
+        width: 600,
+        type: 'donut',
+    },
+    plotOptions: {
+        pie: {
+          donut: {
+            labels: {
+              show: true,
+              name: {
+                  show: true
+              },
+              value: {
+                  show: true,
+                  formatter: function (val) {
+                    return val
+                  }
+              },
+              total: {
+                  show: true
+              }
+            }
+          }
+        }
     },
     labels: categories,
     series: spent,
+    dataLabels: {
+        enabled: true,
+    },
     responsive: [{
         breakpoint: 480,
         options: {

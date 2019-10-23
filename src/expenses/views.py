@@ -77,7 +77,7 @@ def expense_list_view(request, selected_year=None, selected_month=None):
     # at index category which is an id from the database,
     # assign the value of a dict containing category name and an empty list for expenses
     categories = {
-        None: {'name': 'uncategorized', 'expenses': [], 'id': None, 'total_spent': 0}
+        None: {'name': 'Uncategorized', 'expenses': [], 'id': None, 'total_spent': 0}
     }
 
     for category in cats:
@@ -190,7 +190,8 @@ def receive_email(request):
         # Assign the correct user to each expense
         for expense in expenses:
             expense.user = user
-            expense.save()
+            if expense.amount > 0:
+                expense.save()
 
     # Returned text is ignored but HTTP status code matters:
     # Mailgun wants to see 2xx, otherwise it will make another attempt in 5 minutes
