@@ -11,7 +11,7 @@ class ExpenseCategory(models.Model):
 class Expense(models.Model):
     store    = models.CharField(max_length=120)
     date     = models.DateField(null=True)
-    amount   = models.DecimalField(decimal_places=2, max_digits=10000, default=0)
+    amount   = models.DecimalField(decimal_places=2, max_digits=65, default=0)
     user     = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True)
 
