@@ -49,3 +49,5 @@ At this point you should see a success message from mailgun. Now that you've mad
 1. In your list of routes in mailgun, edit the catch_all route.
 2. Set the forward URL to your ngrok url and append `/api/receive-email`, then save.
 3. Forward the email you received from Halkbank to `expenses@sandboxf44eff04716248648a90336077b7a6ac.mailgun.org`
+
+After running migrations, seed the db with default expense categories by loading the fixtures with the following command `python manage.py loaddata seed_expense_categories`

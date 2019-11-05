@@ -1,0 +1,56 @@
+[
+    {
+      "model": "expenses.ExpenseCategory",
+      "fields": {
+        "name": "Supermarket"
+      }
+    },
+    {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Education"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Travel"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Leisure"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Health"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Clothes&Beauty"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Bills"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Rent"
+        }
+      },
+      {
+        "model": "expenses.ExpenseCategory",
+        "fields": {
+          "name": "Gas"
+        }
+      }
+  ]
